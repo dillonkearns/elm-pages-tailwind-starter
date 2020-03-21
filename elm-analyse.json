@@ -1,0 +1,10 @@
+{
+    "excludedPaths" : [
+        "elm-graphql-gen/",
+        "gen/"
+    ],
+    "checks" : {
+        "ImportAll": false
+    }
+}
+

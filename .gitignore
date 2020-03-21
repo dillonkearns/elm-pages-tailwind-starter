@@ -1,0 +1,9 @@
+node_modules
+elm-stuff
+sanity/dist
+dist
+gen/
+elm-graphql-gen
+.cache/
+src/tailwind-compiled.css
+

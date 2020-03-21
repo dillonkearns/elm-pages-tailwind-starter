@@ -1,0 +1,29 @@
+{
+  "name": "elm-pages-example",
+  "version": "1.0.0",
+  "description": "Example site built with elm-pages.",
+  "scripts": {
+    "start": "npm run generate-all && elm-pages develop --port 1234",
+    "serve": "npm run generate-all && http-server ./dist -a localhost -p 3000 -c-1",
+    "generate-all": "npm run generate:tailwind",
+    "build": "npm run generate-all && elm-pages build",
+    "generate:tailwind": "postcss tailwind.css -o src/tailwind-compiled.css"
+  },
+  "author": "Dillon Kearns",
+  "license": "BSD-3",
+  "dependencies": {
+    "@fullhuman/postcss-purgecss": "^2.1.0",
+    "cssnano": "^4.1.10",
+    "highlight.js": "^9.15.10",
+    "node-sass": "^4.12.0",
+    "tailwindcss": "^1.2.0"
+  },
+  "devDependencies": {
+    "@dillonkearns/elm-graphql": "^4.0.2",
+    "elm": "latest-0.19.1",
+    "elm-format": "0.8.3",
+    "elm-pages": "1.2.11",
+    "http-server": "^0.11.1",
+    "postcss-cli": "^7.1.0"
+  }
+}
