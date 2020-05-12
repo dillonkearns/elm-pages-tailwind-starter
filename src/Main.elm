@@ -8,6 +8,7 @@ import Head
 import Head.Seo as Seo
 import Html exposing (..)
 import Html.Attributes as Attr exposing (class)
+import Json.Decode
 import Layout
 import Markdown
 import MenuSvg
@@ -15,7 +16,6 @@ import Metadata exposing (Metadata)
 import MySitemap
 import Pages exposing (images, pages)
 import Pages.Directory as Directory exposing (Directory)
-import Pages.Document
 import Pages.ImagePath as ImagePath exposing (ImagePath)
 import Pages.Manifest as Manifest
 import Pages.Manifest.Category
@@ -46,20 +46,20 @@ type alias Rendered =
 
 main : Pages.Platform.Program Model Msg Metadata Rendered
 main =
-    Pages.Platform.application
+    Pages.Platform.init
         { init = \_ -> init
         , view = view
         , update = update
         , subscriptions = subscriptions
         , documents =
-            [ markdownDocument
-            ]
+            [ markdownDocument ]
         , manifest = manifest
         , canonicalSiteUrl = canonicalSiteUrl
-        , onPageChange = \_ -> OnPageChange
-        , generateFiles = generateFiles
+        , onPageChange = Just (\_ -> OnPageChange)
         , internals = Pages.internals
         }
+        |> Pages.Platform.withFileGenerator generateFiles
+        |> Pages.Platform.toProgram
 
 
 generateFiles :
@@ -69,28 +69,30 @@ generateFiles :
         , body : String
         }
     ->
-        List
-            (Result String
-                { path : List String
-                , content : String
-                }
+        StaticHttp.Request
+            (List
+                (Result String
+                    { path : List String
+                    , content : String
+                    }
+                )
             )
 generateFiles siteMetadata =
-    [ Feed.fileToGenerate { siteTagline = siteTagline, siteUrl = canonicalSiteUrl } siteMetadata |> Ok
-    , MySitemap.build { siteUrl = canonicalSiteUrl } siteMetadata |> Ok
-    ]
+    StaticHttp.succeed
+        [ Feed.fileToGenerate { siteTagline = siteTagline, siteUrl = canonicalSiteUrl } siteMetadata |> Ok
+        , MySitemap.build { siteUrl = canonicalSiteUrl } siteMetadata |> Ok
+        ]
 
 
-markdownDocument : ( String, Pages.Document.DocumentHandler Metadata Rendered )
+markdownDocument : { extension : String, metadata : Json.Decode.Decoder Metadata, body : String -> Result error (Html msg) }
 markdownDocument =
-    Pages.Document.parser
-        { extension = "md"
-        , metadata = Metadata.decoder
-        , body =
-            \markdownBody ->
-                Html.div [] [ Markdown.toHtml [] markdownBody ]
-                    |> Ok
-        }
+    { extension = "md"
+    , metadata = Metadata.decoder
+    , body =
+        \markdownBody ->
+            Html.div [] [ Markdown.toHtml [] markdownBody ]
+                |> Ok
+    }
 
 
 type alias Model =
